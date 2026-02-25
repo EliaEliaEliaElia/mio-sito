@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Base Converter | ToolFast</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <header></header>
+
+    <main class="container">
+        <section class="tool-card">
+            <h1>Number Base Converter</h1>
+            <p>Convert numbers between Decimal, Binary, Hexadecimal, and Octal in real-time.</p>
+            
+            <div style="margin: 2rem 0; text-align: left; display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold;">Decimal (Base 10)</label>
+                    <input type="number" id="decimalInput" placeholder="e.g. 255" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                </div>
+                
+                <div>
+                    <label style="display: block; font-weight: bold;">Binary (Base 2)</label>
+                    <input type="text" id="binaryInput" placeholder="e.g. 11111111" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                </div>
+                
+                <div>
+                    <label style="display: block; font-weight: bold;">Hexadecimal (Base 16)</label>
+                    <input type="text" id="hexInput" placeholder="e.g. FF" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: bold;">Octal (Base 8)</label>
+                    <input type="text" id="octalInput" placeholder="e.g. 377" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                </div>
+            </div>
+
+            <button onclick="clearFields()" class="btn-primary" style="background-color: #64748b;">Clear All Fields</button>
+        </section>
+    </main>
+
+    <footer></footer>
+
+    <script src="../components.js"></script>
+    <script>
+        const dec = document.getElementById('decimalInput');
+        const bin = document.getElementById('binaryInput');
+        const hex = document.getElementById('hexInput');
+        const oct = document.getElementById('octalInput');
+
+        // Funzione centrale per aggiornare tutti i campi
+        function updateAllFromDecimal(value) {
+            const num = parseInt(value);
+            if (isNaN(num)) {
+                clearFields();
+                return;
+            }
+            bin.value = num.toString(2);
+            hex.value = num.toString(16).toUpperCase();
+            oct.value = num.toString(8);
+        }
+
+        // Event Listeners
+        dec.addEventListener('input', () => {
+            updateAllFromDecimal(dec.value);
+        });
+
+        bin.addEventListener('input', () => {
+            const num = parseInt(bin.value, 2);
+            if (!isNaN(num)) {
+                dec.value = num;
+                hex.value = num.toString(16).toUpperCase();
+                oct.value = num.toString(8);
+            } else if (bin.value === "") clearFields();
+        });
+
+        hex.addEventListener('input', () => {
+            const num = parseInt(hex.value, 16);
+            if (!isNaN(num)) {
+                dec.value = num;
+                bin.value = num.toString(2);
+                oct.value = num.toString(8);
+            } else if (hex.value === "") clearFields();
+        });
+
+        oct.addEventListener('input', () => {
+            const num = parseInt(oct.value, 8);
+            if (!isNaN(num)) {
+                dec.value = num;
+                bin.value = num.toString(2);
+                hex.value = num.toString(16).toUpperCase();
+            } else if (oct.value === "") clearFields();
+        });
+
+        function clearFields() {
+            dec.value = "";
+            bin.value = "";
+            hex.value = "";
+            oct.value = "";
+        }
+    </script>
+</body>
+</html>
