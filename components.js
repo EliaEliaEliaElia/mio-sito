@@ -1,17 +1,19 @@
-// --- CONFIGURAZIONE GOOGLE ANALYTICS ---
-const GA_ID = "G-YFYPYREJHH";
+// === Google Analytics Globale ===
+(function() {
+    // 1. Carica lo script esterno di Google
+    const gtagScript = document.createElement("script");
+    gtagScript.async = true;
+    gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=G-YFYPYREJHH";
+    document.head.appendChild(gtagScript);
 
-// 1. Caricamento dinamico dello script di Google (gtag.js)
-const scriptGA = document.createElement('script');
-scriptGA.async = true;
-scriptGA.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
-document.head.appendChild(scriptGA);
+    // 2. Inizializza dataLayer e gtag
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    window.gtag = gtag;
 
-// 2. Inizializzazione di Google Analytics
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', GA_ID);
+    gtag('js', new Date());
+    gtag('config', 'G-YFYPYREJHH');
+})();
 // Funzione per inserire Header e Footer in automatico
 document.addEventListener("DOMContentLoaded", function() {
     
