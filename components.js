@@ -1,3 +1,17 @@
+// --- CONFIGURAZIONE GOOGLE ANALYTICS ---
+const GA_ID = "G-YFYPYREJHH";
+
+// 1. Caricamento dinamico dello script di Google (gtag.js)
+const scriptGA = document.createElement('script');
+scriptGA.async = true;
+scriptGA.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+document.head.appendChild(scriptGA);
+
+// 2. Inizializzazione di Google Analytics
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', GA_ID);
 // Funzione per inserire Header e Footer in automatico
 document.addEventListener("DOMContentLoaded", function() {
     
