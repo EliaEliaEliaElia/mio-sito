@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heads or Tails | ToolFast</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <style>        
+        /* Contenitore principale della moneta per la prospettiva 3D */
+        .coin-container {
+            width: 150px;
+            height: 150px;
+            perspective: 1000px; /* Crea l'effetto profondità 3D */
+            margin: 2rem auto;
+            cursor: pointer;
+        }
+
+        /* L'oggetto moneta che ruota */
+        #coin {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d; /* Mantiene le facce in 3D */
+            transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Stile comune per entrambe le facce */
+        .side {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            border-radius: 50%;
+            backface-visibility: hidden; /* Nasconde la faccia posteriore quando ruota */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem; /* Dimensione delle icone se non usi immagini */
+            background-color: #f1f5f9; /* Sfondo di fallback */
+        }
+
+        /* Faccia Testa (Heads) */
+        #heads {
+            background-color: #fbbf24; /* Colore oro/giallo */
+            color: #b45309;
+            z-index: 100; /* Sta davanti all'inizio */
+        }
+
+        /* Faccia Croce (Tails) */
+        #tails {
+            background-color: #94a3b8; /* Colore argento/grigio */
+            color: #1e293b;
+            transform: rotateY(180deg); /* Inizialmente girata di 180 gradi */
+        }
+
+        /* Icone o immagini dentro le facce */
+        .side img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+        }
+
+        /* Stile per la scritta del risultato */
+        #status-text {
+            font-size: 2rem;
+            font-weight: bold;
+            min-height: 2.5rem; /* Evita salti di layout */
+            margin-top: 1rem;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <header></header>
+
+    <main class="container">
+        <section class="tool-card">
+            <h1>Heads or Tails Coin Flip</h1>
+            <p>Click the coin or the button to flip.</p>
+            
+            <div class="coin-container" id="coin-wrapper">
+                <div id="coin">
+                    <div class="side" id="heads">
+                        <span>👤</span> 
+                    </div>
+                    <div class="side" id="tails">
+                        <span>🦅</span> 
+                    </div>
+                </div>
+            </div>
+
+            <div id="status-text">Click to flip!</div>
+            
+            <button id="flip-btn" class="btn-primary">Flip Coin</button>
+        </section>
+    </main>
+
+    <footer></footer>
+
+    <script src="components.js"></script>
+    
+    <script>        
+        const coin = document.getElementById('coin');
+        const statusText = document.getElementById('status-text');
+        let currentRotation = 0; // Teniamo traccia della rotazione attuale
+        let isFlipping = false;
+
+        function flipCoin() {
+            if (isFlipping) return; // Se sta già girando, non fare nulla
+            
+            isFlipping = true;
+            statusText.innerText = "Flipping...";
+            const isHeads = Math.random() < 0.5;
+            const rotation = isHeads ? 1800 : 1980;
+            coin.style.transition = 'none';
+            coin.style.transform = 'rotateY(0deg)';
+            setTimeout(() => {
+                coin.style.transition = 'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                coin.style.transform = `rotateY(${rotation}deg)`;
+            }, 50);
+            setTimeout(() => {
+                isFlipping = false;
+                statusText.innerText = isHeads ? "Heads" : "Tails";
+                statusText.style.color = isHeads ? "#b45309" : "#1e293b";
+            }, 1550);
+        }
+
+        document.getElementById('flip-btn').addEventListener('click', flipCoin);
+        document.getElementById('coin-wrapper').addEventListener('click', flipCoin);
+    </script>
+</body>
+</html>

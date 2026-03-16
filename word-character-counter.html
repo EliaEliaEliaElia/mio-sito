@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Counter & Text Analysis | ToolFast</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-bottom: 4px solid var(--primary);
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .stat-card div {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            resize: vertical;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .analysis-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .analysis-section { grid-template-columns: 1fr; }
+        }
+
+        .density-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .density-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .badge {
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header></header>
+
+    <main class="container">
+        <section class="tool-card">
+            <h1>Word & Character Counter</h1>
+            <p>Analyze your text in real-time with keyword density and reading time.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card" style="border-color: #2ca02c;">
+                    <h4>Words</h4>
+                    <div id="word-count">0</div>
+                </div>
+                <div class="stat-card" style="border-color: #17becf;">
+                    <h4>Characters</h4>
+                    <div id="char-count">0</div>
+                </div>
+                <div class="stat-card" style="border-color: #9467bd;">
+                    <h4>Spaces</h4>
+                    <div id="space-count">0</div>
+                </div>
+                <div class="stat-card" style="border-color: #e377c2;">
+                    <h4>Reading Time</h4>
+                    <div id="read-time">0 min</div>
+                </div>
+            </div>
+
+            <textarea id="text-input" placeholder="Paste or type your text here..."></textarea>
+
+            <div class="analysis-section">
+                <div>
+                    <h3>Top Keywords</h3>
+                    <ul id="density-list" class="density-list">
+                        <li class="density-item">Enter some text to see density...</li>
+                    </ul>
+                </div>
+
+                <div style="background: #f1f5f9; padding: 20px; border-radius: 12px;">
+                    <h3>Quick Actions</h3>
+                    <button class="btn-primary" onclick="copyText()" style="width: 100%; margin-bottom: 10px;">Copy Text</button>
+                    <button class="btn-secondary" onclick="clearText()" style="width: 100%;">Clear All</button>
+                    
+                    <div style="margin-top: 20px; font-size: 0.9rem; color: #475569;">
+                        <strong>Sentences:</strong> <span id="sentence-count">0</span><br>
+                        <strong>Characters (no spaces):</strong> <span id="char-no-spaces">0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer></footer>
+
+    <script src="components.js"></script>
+    <script>
+        const input = document.getElementById('text-input');
+        
+        input.addEventListener('input', analyzeText);
+
+        function analyzeText() {
+            const text = input.value;
+            
+            // 1. Basic Counts
+            const chars = text.length;
+            const spaces = (text.match(/ /g) || []).length;
+            const charNoSpaces = text.replace(/\s+/g, '').length;
+            
+            // Parole: usiamo regex per evitare di contare spazi vuoti come parole
+            const wordsArray = text.trim().split(/\s+/).filter(word => word.length > 0);
+            const wordCount = wordsArray.length;
+
+            // Frasi
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+
+            // 2. Update UI
+            document.getElementById('char-count').innerText = chars;
+            document.getElementById('word-count').innerText = wordCount;
+            document.getElementById('space-count').innerText = spaces;
+            document.getElementById('char-no-spaces').innerText = charNoSpaces;
+            document.getElementById('sentence-count').innerText = sentences;
+
+            // 3. Reading Time (media 200 parole/min)
+            const readTime = Math.ceil(wordCount / 200);
+            document.getElementById('read-time').innerText = readTime + " min";
+
+            // 4. Keyword Density
+            updateDensity(wordsArray);
+        }
+
+        function updateDensity(words) {
+            const densityList = document.getElementById('density-list');
+            if (words.length === 0) {
+                densityList.innerHTML = '<li class="density-item">Enter text to see density...</li>';
+                return;
+            }
+
+            const freq = {};
+            // Filtriamo parole troppo comuni o corte (meno di 3 lettere)
+            const stopWords = ['the', 'and', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'with', 'by', 'is', 'are', 'was', 'were', 'that', 'this', 'it', 'of', 'from'];
+            
+            words.forEach(w => {
+                let cleanWord = w.toLowerCase().replace(/[.,!?;:()]/g, '');
+                if (cleanWord.length > 3 && !stopWords.includes(cleanWord)) {
+                    freq[cleanWord] = (freq[cleanWord] || 0) + 1;
+                }
+            });
+
+            // Ordiniamo per frequenza
+            const sorted = Object.entries(freq)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5); // Prendiamo le prime 5
+
+            densityList.innerHTML = sorted.map(([word, count]) => `
+                <li class="density-item">
+                    <span>${word}</span>
+                    <span class="badge">${count}</span>
+                </li>
+            `).join('') || '<li class="density-item">No significant keywords found.</li>';
+        }
+
+        function copyText() {
+            input.select();
+            document.execCommand('copy');
+            alert('Text copied to clipboard!');
+        }
+
+        function clearText() {
+            input.value = '';
+            analyzeText();
+        }
+    </script>
+</body>
+</html>

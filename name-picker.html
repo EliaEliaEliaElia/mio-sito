@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortune Wheel Picker | ToolFast</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .picker-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            margin-top: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .picker-container { grid-template-columns: 1fr; }
+        }
+
+        .input-section { text-align: left; }
+        
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            resize: none;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        /* Container Ruota */
+        .wheel-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        /* L'indicatore (la freccia che punta il vincitore) */
+        #wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: #1e293b;
+            clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+            z-index: 10;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        #winner-popup {
+            margin-top: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            min-height: 3rem;
+        }
+
+        .btn-spin {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: #ff7f0e; /* Arancione d20 */
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .btn-spin:active { transform: scale(0.95); }
+        .btn-spin:disabled { background: #cbd5e1; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <header></header>
+
+    <main class="container">
+        <section class="tool-card">
+            <h1>Fortune Wheel Name Picker</h1>
+            <p>Enter up to 100 names and spin the wheel!</p>
+
+            <div class="picker-container">
+                <div class="input-section">
+                    <label style="font-weight: bold; display: block; margin-bottom: 10px;">
+                        Names (one per line):
+                    </label>
+                    <textarea id="names-input" placeholder="Enter names here...">Name 1&#10;Name 2&#10;Name 3&#10;Name 4&#10;Name 5</textarea>
+                    <div style="font-size: 0.8rem; color: #64748b;">
+                        Count: <span id="name-count">5</span> / 100
+                    </div>
+                </div>
+
+                <div class="wheel-section">
+                    <div id="canvas-container">
+                        <div id="wheel-pointer"></div>
+                        <canvas id="wheelCanvas" width="800" height="800"></canvas>
+                    </div>
+                    
+                    <div id="winner-popup"></div>
+                    <button id="spin-btn" class="btn-spin">SPIN!</button>
+                    <label style="margin-top: 15px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="remove-winner"> Remove winner after pick
+                    </label>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer></footer>
+
+    <script>
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const textarea = document.getElementById('names-input');
+        const spinBtn = document.getElementById('spin-btn');
+        const winnerDisplay = document.getElementById('winner-popup');
+        const removeCheckbox = document.getElementById('remove-winner');
+
+        const diceColors = ['#2ca02c', '#17becf', '#9467bd', '#e377c2', '#d62728'];
+        let names = [];
+        let currentAngle = 0;
+        let isSpinning = false;
+
+        // Funzione per sincronizzare l'array con la textarea
+        function updateNamesFromTextarea() {
+            names = textarea.value.split('\n').filter(n => n.trim() !== '').slice(0, 100);
+            document.getElementById('name-count').innerText = names.length;
+        }
+
+        function drawWheel() {
+            // Se non stiamo girando, aggiorniamo i nomi dalla textarea
+            if (!isSpinning) {
+                updateNamesFromTextarea();
+            }
+            
+            const numSegments = names.length;
+            if (numSegments === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
+            const arcSize = (2 * Math.PI) / numSegments;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            names.forEach((name, i) => {
+                const angle = currentAngle + i * arcSize;
+                
+                ctx.beginPath();
+                ctx.fillStyle = diceColors[i % diceColors.length];
+                ctx.moveTo(400, 400);
+                ctx.arc(400, 400, 380, angle, angle + arcSize);
+                ctx.lineTo(400, 400);
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(400, 400);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "white";
+                ctx.font = names.length > 20 ? "bold 16px Arial" : "bold 24px Arial";
+                ctx.fillText(name, 350, 10);
+                ctx.restore();
+            });
+        }
+
+        function spin() {
+            if (isSpinning || names.length < 2) return;
+            
+            // Sincronizziamo un'ultima volta prima di partire
+            updateNamesFromTextarea();
+            
+            isSpinning = true;
+            winnerDisplay.innerText = "Good Luck!";
+            
+            const spinDuration = 4000;
+            const startRotation = currentAngle;
+            const extraSpins = (Math.random() * 5 + 5) * 2 * Math.PI;
+            const totalRotation = extraSpins;
+            const startTime = performance.now();
+
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / spinDuration, 1);
+                const easing = 1 - Math.pow(1 - progress, 3);
+                
+                currentAngle = startRotation + (totalRotation * easing);
+                drawWheel();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    determineWinner();
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function determineWinner() {
+            const numSegments = names.length;
+            const arcSize = (2 * Math.PI) / numSegments;
+            
+            const normalizedAngle = (currentAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+            const winningIndex = Math.floor((2 * Math.PI - normalizedAngle + (3 * Math.PI / 2)) % (2 * Math.PI) / arcSize) % numSegments;
+            
+            const winner = names[winningIndex];
+            winnerDisplay.innerText = "🏆 " + winner;
+
+            if (removeCheckbox && removeCheckbox.checked) {
+                // 1. Rimuovi dall'array locale
+                names.splice(winningIndex, 1);
+                
+                // 2. Aggiorna IMMEDIATAMENTE la textarea
+                textarea.value = names.join('\n');
+                document.getElementById('name-count').innerText = names.length;
+                
+                // 3. Aspetta un momento e ridisegna la ruota senza il vincitore
+                setTimeout(() => {
+                    drawWheel();
+                    winnerDisplay.innerText = "Winner Removed!";
+                }, 1000);
+            }
+        }
+
+        textarea.addEventListener('input', drawWheel);
+        spinBtn.addEventListener('click', spin);
+        drawWheel();
+    </script>
+    <script src="components.js"></script>
+</body>
+</html>

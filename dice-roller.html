@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Dice Roller | ToolFast</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dice-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin: 2rem 0;
+            min-height: 140px;
+            flex-wrap: wrap; /* Per gestire più dadi su mobile */
+        }
+
+        /* --- Stili di base per ogni dado --- */
+        .die {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Migliora la leggibilità del numero */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            transition: transform 0.1s ease;
+        }
+
+        /* --- Definizione delle FORME e COLORI specifici --- */
+
+        /* d4: Triangolo Verde */
+        .die.d4 {
+            background-color: #2ca02c; /* Verde scuro */
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        /* d6: Quadrato Azzurro */
+        .die.d6 {
+            background-color: #17becf; /* Azzurro/Ciano */
+            /* Un quadrato non ha bisogno di clip-path specifico, è il default */
+            border-radius: 8px; /* Un po' arrotondato per estetica */
+        }
+
+        /* d8: Esagono Viola (orientato verticalmente) */
+        .die.d8 {
+            background-color: #9467bd; /* Viola chiaro */
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        /* d10: Aquilone/Rombo Fucsia */
+        .die.d10 {
+            background-color: #e377c2; /* Fucsia */
+            clip-path: polygon(50% 0%, 100% 70%, 50% 100%, 0% 70%);
+        }
+
+        /* d12: Dodecaedro (rappresentato come un dodecagono irregolare) Rosso */
+        .die.d12 {
+            background-color: #d62728; /* Rosso scuro */
+            clip-path: polygon(50% 0%, 80% 10%, 100% 35%, 100% 70%, 80% 90%, 50% 100%, 20% 90%, 0% 70%, 0% 35%, 20% 10%);
+        }
+
+        /* d20: Icosaedro (rappresentato come un esagono più complesso) Arancione */
+        .die.d20 {
+            background-color: #ff7f0e; /* Arancione */
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+        }
+
+
+        /* --- Animazione di scuotimento --- */
+        .shake {
+            animation: shakeAnim 0.5s infinite linear;
+        }
+
+        @keyframes shakeAnim {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            20% { transform: translate(-1px, -2px) rotate(-1deg); }
+            40% { transform: translate(-3px, 0px) rotate(1deg); }
+            60% { transform: translate(3px, 2px) rotate(0deg); }
+            80% { transform: translate(1px, -1px) rotate(1deg); }
+            100% { transform: translate(-1px, 2px) rotate(-1deg); }
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .total-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+    <header></header>
+
+    <main class="container">
+        <section class="tool-card">
+            <h1>Visual Dice Roller</h1>
+            <p>Roll unique dice with specific shapes and colors.</p>
+
+            <div class="controls-grid">
+                <div>
+                    <label for="dice-count" style="display: block; font-weight: bold; margin-bottom: 8px;">Number of Dice</label>
+                    <select id="dice-count" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem;">
+                        <option value="1">1 Die</option>
+                        <option value="2">2 Dice</option>
+                        <option value="3">3 Dice</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="dice-sides" style="display: block; font-weight: bold; margin-bottom: 8px;">Dice Type (d)</label>
+                    <select id="dice-sides" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem;">
+                        <option value="4">d4 (Triangle)</option>
+                        <option value="6" selected>d6 (Square)</option>
+                        <option value="8">d8 (Hexagon)</option>
+                        <option value="10">d10 (Kite)</option>
+                        <option value="12">d12 (Dodecahedron)</option>
+                        <option value="20">d20 (Icosahedron)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="dice-area" id="dice-container">
+                </div>
+
+            <div class="total-display" id="total-text">Total: -</div>
+            
+            <button id="roll-btn" class="btn-primary" style="width: 100%; margin-top: 25px; font-size: 1.2rem; padding: 15px;">Roll Dice!</button>
+        </section>
+    </main>
+
+    <footer></footer>
+
+    <script src="components.js"></script>
+    <script>
+        const diceContainer = document.getElementById('dice-container');
+        const rollBtn = document.getElementById('roll-btn');
+        const totalText = document.getElementById('total-text');
+        const countSelect = document.getElementById('dice-count');
+        const sidesSelect = document.getElementById('dice-sides');
+
+        let isRolling = false;
+
+        function rollDice() {
+            if (isRolling) return;
+            isRolling = true;
+
+            const count = parseInt(countSelect.value);
+            const sides = parseInt(sidesSelect.value);
+            
+            // Pulisci l'area dei dadi
+            diceContainer.innerHTML = '';
+            const diceElements = [];
+
+            // Crea i nuovi dadi con le classi CSS specifiche
+            for (let i = 0; i < count; i++) {
+                const die = document.createElement('div');
+                // Aggiunge la classe base e la classe specifica per il tipo (es. 'die d20')
+                die.className = `die d${sides} shake`;
+                die.innerText = '?';
+                diceContainer.appendChild(die);
+                diceElements.push(die);
+            }
+
+            totalText.innerText = "Rolling...";
+            totalText.style.color = "#64748b"; // Colore neutro durante il lancio
+
+            // Effetto scorrimento numeri veloci (50ms per cambio)
+            let rollsCount = 0;
+            const interval = setInterval(() => {
+                diceElements.forEach(die => {
+                    die.innerText = Math.floor(Math.random() * sides) + 1;
+                });
+                rollsCount++;
+                if (rollsCount > 12) clearInterval(interval); // Circa 0.6s di animazione numeri
+            }, 50);
+
+            // Risultato finale dopo 0.65 secondi
+            setTimeout(() => {
+                let total = 0;
+                diceElements.forEach(die => {
+                    die.classList.remove('shake'); // Ferma lo shake
+                    const result = Math.floor(Math.random() * sides) + 1;
+                    die.innerText = result;
+                    total += result;
+                });
+
+                totalText.innerText = `Total: ${total}`;
+                totalText.style.color = "var(--text-dark)"; // Colore finale
+                isRolling = false;
+            }, 650);
+        }
+
+        // Event Listener per il pulsante
+        rollBtn.addEventListener('click', rollDice);
+
+        // Genera i dadi di default al caricamento
+        rollDice();
+    </script>
+</body>
+</html>

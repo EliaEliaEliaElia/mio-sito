@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Number Generator | ToolFast</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <nav class="container" style="display: flex; justify-content: space-between; align-items: center;background: white; padding: 1rem 0; border-bottom: 1px solid #e2e8f0;">
+            <div class="logo" style="font-weight: bold; font-size: 1.2rem; color: var(--primary);">ToolFast</div>
+            <ul style="list-style: none; display: flex; gap: 20px; margin: 0; padding: 0;">
+                <li><a href="index.html" style="text-decoration: none; color: var(--text);">Home</a></li>
+                
+                <li class="nav-item">
+                    <a href="#" style="text-decoration: none; color: var(--text);">Random</a>
+                    <ul class="dropdown" style="list-style: none; margin: 0; padding: 0;">
+                        <li><a href="random/letters-generator.html">Letters Generator</a></li>
+                        <li><a href="random/numbers-generator.html">Numbers Generator</a></li>
+                        <li><a href="/password-generator.html">Password Generator</a></li>
+                        <li><a href="/name-picker.html">Name Picker</a></li>
+                        <li><a href="/dice-roller.html">Dice Roller</a></li>
+                        <li><a href="/heads-or-tails.html">Heads Or Tails</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" style="text-decoration: none; color: var(--text);">Converters</a>
+                    <ul class="dropdown" style="list-style: none; margin: 0; padding: 0;">
+                        <li><a href="/aspect-ratio-converter.html">Aspect Ratio Converter</a></li>
+                        <li><a href="/base-converter.html">Base Converter</a></li>
+                        <li><a href="/units-ratio-converter.html">Units Converter</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" style="text-decoration: none; color: var(--text);">Text</a>
+                    <ul class="dropdown" style="list-style: none; margin: 0; padding: 0;">
+                        <li><a href="mio-sito/text/case-converter.html">Case Converter</a></li>
+                        <li><a href="mio-sito/text/lorem-ipsum.html">Lorem Ipsum</a></li>
+                        <li><a href="mio-sito/text/word-character-counter.html">Word Character Counter</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="tool-card">
+            <h1>Random Number Generator</h1>
+            <p>Pick a random number within your chosen range.</p>
+            
+            <div style="margin: 2rem 0; display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label for="min-val" style="display: block; font-weight: bold; margin-bottom: 5px;">Min</label>
+                        <input type="number" id="min-val" value="1" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="max-val" style="display: block; font-weight: bold; margin-bottom: 5px;">Max</label>
+                        <input type="number" id="max-val" value="100" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                    </div>
+                </div>
+
+                <div id="result-display" style="font-size: 3rem; margin: 1rem 0; text-align: center;">?</div>
+                
+                <button id="generate-btn" class="btn-primary">Generate Number</button>
+            </div>
+        </section>
+    </main>
+
+    <footer></footer>
+
+    <script src="../components.js"></script>
+    <script>
+        document.getElementById('generate-btn').addEventListener('click', function() {
+            const min = parseInt(document.getElementById('min-val').value);
+            const max = parseInt(document.getElementById('max-val').value);
+            const display = document.getElementById('result-display');
+
+            if (isNaN(min) || isNaN(max)) {
+                display.innerText = "Error";
+                return;
+            }
+
+            if (min >= max) {
+                display.innerText = "Invalid Range";
+                display.style.fontSize = "1.5rem";
+                return;
+            }
+
+            display.style.fontSize = "3rem";
+            // Formula per includere sia il min che il max
+            const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+            
+            // Effetto "caricamento" veloce per rendere il tool più dinamico
+            display.style.opacity = "0.3";
+            setTimeout(() => {
+                display.innerText = randomNumber;
+                display.style.opacity = "1";
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspect Ratio Calculator | ToolFast</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .ratio-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            text-align: left;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .ratio-container { grid-template-columns: 1fr; }
+        }
+
+        .input-group {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-group h3 { margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; }
+
+        .field { margin-bottom: 15px; }
+        
+        label { display: block; font-size: 0.85rem; font-weight: bold; color: #64748b; margin-bottom: 5px; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .visual-preview {
+            grid-column: 1 / -1;
+            background: #f1f5f9;
+            padding: 40px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #preview-box {
+            background: var(--primary);
+            width: 160px;
+            height: 90px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .result-badge {
+            margin-top: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+    <header></header>
+
+    <main class="container">
+        <section class="tool-card">
+            <h1>Aspect Ratio Calculator</h1>
+            <p>Maintain perfect proportions for your images and videos.</p>
+
+            <div class="ratio-container">
+                <div class="input-group">
+                    <h3>1. Set Ratio</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label>Ratio Width</label>
+                            <input type="number" id="r-w" value="16">
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Ratio Height</label>
+                            <input type="number" id="r-h" value="9">
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        <button class="btn-tool" onclick="setRatio(16,9)">16:9 (Video)</button>
+                        <button class="btn-tool" onclick="setRatio(1,1)">1:1 (Post)</button>
+                        <button class="btn-tool" onclick="setRatio(9,16)">9:16 (Story)</button>
+                        <button class="btn-tool" onclick="setRatio(4,3)">4:3 (Photo)</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <h3>2. Calculate Pixels</h3>
+                    <div class="field">
+                        <label>Width (px)</label>
+                        <input type="number" id="px-w" value="1920">
+                    </div>
+                    <div class="field">
+                        <label>Height (px)</label>
+                        <input type="number" id="px-h" value="1080">
+                    </div>
+                    <p style="font-size: 0.8rem; color: #64748b;">Changing one value updates the other based on the ratio.</p>
+                </div>
+
+                <div class="visual-preview">
+                    <div id="preview-box">Preview</div>
+                    <div class="result-badge" id="ratio-display">Current Ratio: 16:9</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer></footer>
+
+    <script>
+        const rw = document.getElementById('r-w');
+        const rh = document.getElementById('r-h');
+        const pxw = document.getElementById('px-w');
+        const pxh = document.getElementById('px-h');
+        const ratioDisplay = document.getElementById('ratio-display');
+        const previewBox = document.getElementById('preview-box');
+
+        // Imposta rapporti predefiniti
+        function setRatio(w, h) {
+            rw.value = w;
+            rh.value = h;
+            updateFromWidth(); // Ricalcola i pixel partendo dalla larghezza attuale
+        }
+
+        // Calcola il Massimo Comune Divisore per mostrare il rapporto pulito
+        function gcd(a, b) {
+            return b ? gcd(b, a % b) : a;
+        }
+
+        function updateVisuals() {
+            const w = parseFloat(pxw.value) || 1;
+            const h = parseFloat(pxh.value) || 1;
+            
+            // Update Label
+            const common = gcd(rw.value, rh.value);
+            ratioDisplay.innerText = `Current Ratio: ${rw.value/common}:${rh.value/common}`;
+
+            // Update Box
+            const maxDim = 200;
+            if (w >= h) {
+                previewBox.style.width = maxDim + 'px';
+                previewBox.style.height = (maxDim * (h / w)) + 'px';
+            } else {
+                previewBox.style.height = maxDim + 'px';
+                previewBox.style.width = (maxDim * (w / h)) + 'px';
+            }
+        }
+
+        function updateFromWidth() {
+            const ratio = rw.value / rh.value;
+            if (pxw.value && ratio) {
+                pxh.value = Math.round(pxw.value / ratio);
+            }
+            updateVisuals();
+        }
+
+        function updateFromHeight() {
+            const ratio = rw.value / rh.value;
+            if (pxh.value && ratio) {
+                pxw.value = Math.round(pxh.value * ratio);
+            }
+            updateVisuals();
+        }
+
+        // Listeners
+        rw.addEventListener('input', updateFromWidth);
+        rh.addEventListener('input', updateFromWidth);
+        pxw.addEventListener('input', updateFromWidth);
+        pxh.addEventListener('input', updateFromHeight);
+
+        // Init
+        updateVisuals();
+    </script>
+    <script src="components.js"></script>
+</body>
+</html>
