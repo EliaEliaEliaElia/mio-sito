@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
     </style>
 
     <nav class="container" style="display: flex; justify-content: space-between; align-items: center;background: white; padding: 1rem 0; border-bottom: 1px solid #e2e8f0;">
-        <div class="logo"><img src="assets/img/Logo.png" alt="ToolFast Logo" style="height:40px; border-radius:10px;"></div>
+        <div class="logo"><img src="assets/img/Logo.png" alt="ToolFast official logo - Free online tools and generators for daily digital tasks." style="height:40px; border-radius:10px;"></div>
         <ul style="list-style: none; display: flex; gap: 20px; margin: 0; padding: 0;">
             <li><a href="index.html" style="text-decoration: none; color: var(--text);">Home</a></li>
             

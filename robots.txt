@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Indica a Google dove si trova la tua mappa del sito
+Sitemap: https://eliaeliaeliaelia.github.io/mio-sito/sitemap.xml
